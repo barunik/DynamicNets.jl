@@ -5,7 +5,7 @@ The code has been developed in Julia 1.4.0 version, as a code accompanying the B
 
 Baruník, J. and Ellington, M. (2020): *Dynamic Networks in Large Financial and Economic Systems*, manuscript [available here for download](https://ideas.repec.org/p/arx/papers/2006.04639.html) (July 2020)
 
-Baruník, J. and Ellington, M. (2020): *Dynamic Network Risk*, manuscript [available here for download](https://ideas.repec.org/p/arx/papers/2006.04639.html) (Jun 2020)
+Baruník, J. and Ellington, M. (2020): *Dynamic Network Risk*, manuscript available soon
 
 
 ## Software requirements
