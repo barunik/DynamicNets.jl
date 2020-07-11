@@ -27,7 +27,7 @@ This example illustrates how to obtain various dynamic network measures on an ex
 
 NOTE that computation time is growing with number of variables in the system and simulations used to obtain measures. This readme file also includes usage of parallel computing that can help to increase the speed of computations tremendously.
 
-Note the full example is available as an interactive [IJulia](https://github.com/JuliaLang/IJulia.jl) notebook [here](https://github.com/barunik/DistributionalForecasts.jl/blob/master/Example.ipynb)
+Note the full example is available also as an interactive [IJulia](https://github.com/JuliaLang/IJulia.jl) notebook [here](/readme.ipynb)
 
 
 Load required packages
@@ -107,7 +107,7 @@ plot(C[1,:],ribbon=(1.96*CI[1,:],1.96*CI[1,:]),fillalpha=0.2,color=["black" "gre
 
 
 
-![svg](/readme_files/soutput_11_0.svg)
+![svg](/readme_files/output_11_0.svg)
 
 
 
