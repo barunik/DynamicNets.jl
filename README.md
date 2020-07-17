@@ -3,7 +3,7 @@
 
 The code provides estimation and inference for *dynamic networks* measures introduced in the following papers
 
-Baruník, J. and Ellington, M. (2020): *Dynamic Networks in Large Financial and Economic Systems*, manuscript available soon
+Baruník, J. and Ellington, M. (2020): *Dynamic Networks in Large Financial and Economic Systems*, manuscript [available here for download](https://ideas.repec.org/p/arx/papers/2007.07842.html) (July 2020) 
 
 Baruník, J. and Ellington, M. (2020): *Dynamic Network Risk*, manuscript [available here for download](https://ideas.repec.org/p/arx/papers/2006.04639.html) (July 2020) 
 
