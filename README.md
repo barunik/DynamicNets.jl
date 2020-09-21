@@ -1,16 +1,16 @@
 # DynamicNets.jl
 
 
-The code provides estimation and inference for *dynamic networks* measures introduced in the following papers
+The code has been developed in Julia 1.4.0 version, as a code accompanying the Barunik and Ellington (2020) papers, and provides an estimation and inference for *dynamic networks* measures introduced in the following papers
 
-Baruník, J. and Ellington, M. (2020): *Dynamic Networks in Large Financial and Economic Systems*, manuscript [available here for download](https://ideas.repec.org/p/arx/papers/2007.07842.html) (July 2020) 
+Baruník, J. and Ellington, M. (2020): *Dynamic Networks in Large Financial and Economic Systems*, manuscript [available here for download](https://ideas.repec.org/p/arx/papers/2006.04639.html) (July 2020)
 
-Baruník, J. and Ellington, M. (2020): *Dynamic Network Risk*, manuscript [available here for download](https://ideas.repec.org/p/arx/papers/2006.04639.html) (July 2020) 
+Baruník, J. and Ellington, M. (2020): *Dynamic Network Risk*, manuscript [available here for download](https://ideas.repec.org/p/arx/papers/2006.04639.html) (Jun 2020)
 
 
 ## Software requirements
 
-[Julia](http://julialang.org/) together with few packages needs to be installed (the code has been developed in Julia 1.4.0 version)
+[Julia](http://julialang.org/) together with few packages needs to be installed
 
 ````julia
 Pkg.add("DataFrames")
@@ -18,6 +18,7 @@ Pkg.add("CSV")
 Pkg.add("Statistics")
 Pkg.add("LinearAlgebra")
 Pkg.add("Distributions")
+Pkg.add("Plots")
 ````
 
 # Example of usage
@@ -27,7 +28,7 @@ This example illustrates how to obtain various dynamic network measures on an ex
 
 NOTE that computation time is growing with number of variables in the system and simulations used to obtain measures. This readme file also includes usage of parallel computing that can help to increase the speed of computations tremendously.
 
-Note the full example is available also as an interactive [IJulia](https://github.com/JuliaLang/IJulia.jl) notebook [here](/readme.ipynb)
+Note the full example is available as an interactive [IJulia](https://github.com/JuliaLang/IJulia.jl) notebook [here](https://github.com/barunik/DistributionalForecasts.jl/blob/master/Example.ipynb)
 
 
 Load required packages
@@ -35,6 +36,7 @@ Load required packages
 
 ```julia
 using DataFrames, CSV, Statistics, LinearAlgebra, Distributions
+using Plots 
 
 # load main functions
 include("DynamicNets_functions.jl");
@@ -49,7 +51,7 @@ data = convert(Matrix{Float64}, data[:,1:4]);
 data = sqrt.(data);
 ```
 
-Function DynNet_time estimates time varying total network connectedness as well as directional connectedness with following inputs and outputs, timing for a 9 variable system and 100 simulations is for MacBook Pro 2016 with 2.9 GHz Dual-Core Intel Core i5. Note julia compiles functions at the first run so the second run times will be much faster
+Function DynNet_time estimates time varying total network connectedness as well as directional connectedness with following inputs and outputs, timing for a 9 variable system and 100 simulations is for MacBook Pro 2020 with 2,3 GHz Quad-Core Intel Core i7 with 32GB 3733 MHz Memory. Note julia compiles functions at the first run so the second run times will be much faster
 
 ````julia
 C,CI = DynNet_time(data,L,H,W,Nsim,corr)
@@ -79,7 +81,7 @@ C,CI = DynNet_time(data,L,H,W,Nsim,corr)
 @time C,CI = DynNet_time(data,2,10,8,100,false);
 ```
 
-    131.543565 seconds (128.91 M allocations: 72.453 GiB, 10.20% gc time)
+     46.210951 seconds (128.11 M allocations: 72.418 GiB, 5.63% gc time)
 
 
 Dimension of the estimated measures is always [ ( 1+5xN ) x T ], for N=4 variables and T=1832 time periods, it is
@@ -148,12 +150,11 @@ Note that current version of the codes works with 3 possible horizons of user's 
 Function DynNet estimates time varying total network connectedness as well as directional connectedness with following inputs and outputs, timing for a 9 variable system and 33 simulations is for MacBook Pro 2016 with 2.9 GHz Dual-Core Intel Core i5
 
 ````julia
-C,CI = DynNet(data,horizon1,horizon2,L,H,W,Nsim,corr)
+C,CI = DynNet(data,horizon1,horizon2,L,W,Nsim,corr)
 
 # INPUTS:  horizon1 = 5  horizon cutting short and medium run
 #          horizon2 = 20 horizon cutting medium and long run
 #          L = 2,       number of lags in VAR
-#          H=10,        horizons in the FEVD
 #          W = 8,       width of kernel bandwidth
 #          Nsim = 100,  number of simulations 
 #          corr = true, true = diagonal covariance matrix of errors
@@ -203,7 +204,7 @@ Example of dynamic horizon specific network with horizons defined as
 @time Chorizon,CIhorizon = DynNet(data,5,20,2,8,33,false);
 ```
 
-    408.456578 seconds (1.52 G allocations: 174.821 GiB, 7.92% gc time)
+    260.019783 seconds (1.52 G allocations: 174.821 GiB, 4.01% gc time)
 
 
 Dimension of the estimated measures is always [ (7 + (2x4x2+4)xN ) x T ], for N=9 variables and T=1832 time periods, it is
