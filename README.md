@@ -3,7 +3,7 @@
 
 The code has been developed in Julia 1.4.0 version, as a code accompanying the Barunik and Ellington (2020) papers, and provides an estimation and inference for *dynamic networks* measures introduced in the following papers
 
-Baruník, J. and Ellington, M. (2020): *Dynamic Networks in Large Financial and Economic Systems*, manuscript [available here for download](https://ideas.repec.org/p/arx/papers/2006.04639.html) (July 2020)
+Baruník, J. and Ellington, M. (2020): *Dynamic Networks in Large Financial and Economic Systems*, manuscript [available here for download](https://ideas.repec.org/p/arx/papers/2007.07842.html) (July 2020)
 
 Baruník, J. and Ellington, M. (2020): *Dynamic Network Risk*, manuscript [available here for download](https://ideas.repec.org/p/arx/papers/2006.04639.html) (Jun 2020)
 
@@ -46,7 +46,7 @@ Load example data
 
 
 ```julia
-data = CSV.read("exampledata.txt",header=false)
+data = CSV.read("exampledata.txt",DataFrame,header=false)
 data = convert(Matrix{Float64}, data[:,1:4]);
 data = sqrt.(data);
 ```
