@@ -235,8 +235,9 @@ function get_timenet(N, HO, irf)
 
 	for i in 1:N
 
-		trT[i] = sum(fev[i, :]) .- fev[i, i]
-		ttT[i] = sum(fev[:, i]) .- fev[i, i]
+		trT[i] = 100.0 .* ( sum(fev[i, :]) .- fev[i, i] ) ./FF
+		ttT[i] = 100.0 .* ( sum(fev[:, i]) .- fev[i, i] ) ./FF
+        
 		DCRTnorm[i]= sum(fev[i, :] ./ fev[i, i])
 		DCTTnorm[i]= sum(fev[:, i] ./ fev[i, i])
 
@@ -458,7 +459,8 @@ function DynNet(data,cut1::Int,cut2::Int,L::Int,H::Int,Nsim::Int,corr)
 	priorprec0 = convert.(Float64, inv(PI));
 
 	xmean=zeros(7 + (2*4*2+4)*N,T);
-	xsd=zeros(7 + (2*4*2+4)*N,T);
+	xci1=zeros(7 + (2*4*2+4)*N,T);
+    xci2=zeros(7 + (2*4*2+4)*N,T);
 
 	for it=1:T
     
@@ -467,12 +469,16 @@ function DynNet(data,cut1::Int,cut2::Int,L::Int,H::Int,Nsim::Int,corr)
 	        out[:,i]=f_all(it, i, cut1,cut2,T, N, L, weights1, priorprec0, X, y, SI, PI, a, RI,corr)
 	    end
 
-	    xmean[:,it] = mean(out,dims=2)
-	    xsd[:,it] = std(out,dims=2)
+	    #xmean[:,it] = mean(out,dims=2)
+	    #xsd[:,it] = std(out,dims=2)
+        
+        xmean[:,it] = [quantile(out[i,:],0.5) for i=1:size(out)[1]]
+	    xci1[:,it] = [quantile(out[i,:],0.025) for i=1:size(out)[1]]
+        xci2[:,it] = [quantile(out[i,:],0.975) for i=1:size(out)[1]]
         
 	end
 
-    return(xmean,xsd)
+	return(xmean,xci1,xci2)
 
 end
 
@@ -522,7 +528,8 @@ function DynNet_time(data,L::Int,HH::Int,H::Int,Nsim::Int,corr)
 	priorprec0 = convert.(Float64, inv(PI))
 
 	xmean=zeros(1+5*N,T);
-	xsd=zeros(1+5*N,T);
+	xci1=zeros(1+5*N,T);
+    xci2=zeros(1+5*N,T);
 
 	for it=1:T
     
@@ -531,11 +538,15 @@ function DynNet_time(data,L::Int,HH::Int,H::Int,Nsim::Int,corr)
 	        out[:,i]=f_time(it, i, T, N, L, weights1, priorprec0, X, y, SI, PI, a, RI,HH,corr)
 	    end
 
-	    xmean[:,it] = mean(out,dims=2)
-	    xsd[:,it] = std(out,dims=2)
+	    #xmean[:,it] = mean(out,dims=2)
+	    #xsd[:,it] = std(out,dims=2)
+        
+        xmean[:,it] = [quantile(out[i,:],0.5) for i=1:size(out)[1]]
+	    xci1[:,it] = [quantile(out[i,:],0.025) for i=1:size(out)[1]]
+        xci2[:,it] = [quantile(out[i,:],0.975) for i=1:size(out)[1]]
         
 	end
 
-	return(xmean,xsd)
+	return(xmean,xci1,xci2)
 
 end

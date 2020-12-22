@@ -28,7 +28,7 @@ This example illustrates how to obtain various dynamic network measures on an ex
 
 NOTE that computation time is growing with number of variables in the system and simulations used to obtain measures. This readme file also includes usage of parallel computing that can help to increase the speed of computations tremendously.
 
-Note the full example is available as an interactive [IJulia](https://github.com/JuliaLang/IJulia.jl) notebook [here](https://github.com/barunik/DynamicNets.jl/blob/master/readme.ipynb)
+Note the full example is available as an interactive [IJulia](https://github.com/JuliaLang/IJulia.jl) notebook [here](https://github.com/barunik/DistributionalForecasts.jl/blob/master/Example.ipynb)
 
 
 Load required packages
@@ -51,10 +51,10 @@ data = convert(Matrix{Float64}, data[:,1:4]);
 data = sqrt.(data);
 ```
 
-Function DynNet_time estimates time varying total network connectedness as well as directional connectedness with following inputs and outputs, timing for a 4 variable system and 100 simulations is for MacBook Pro 2020 with 2,3 GHz Quad-Core Intel Core i7 with 32GB 3733 MHz Memory. Note julia compiles functions at the first run so the second run times will be much faster
+Function DynNet_time estimates time varying total network connectedness as well as directional connectedness with following inputs and outputs, timing for a 9 variable system and 100 simulations is for MacBook Pro 2020 with 2,3 GHz Quad-Core Intel Core i7 with 32GB 3733 MHz Memory. Note julia compiles functions at the first run so the second run times will be much faster
 
 ````julia
-C, CI1, CI2 = DynNet_time(data,L,H,W,Nsim,corr)
+C,CI = DynNet_time(data,L,H,W,Nsim,corr)
 
 # INPUTS: L = 2,       number of lags in VAR
 #          H=10,       horizons in the FEVD
@@ -65,8 +65,8 @@ C, CI1, CI2 = DynNet_time(data,L,H,W,Nsim,corr)
 #
 # OUTPUTS:  C           median estimates of Network Connectedness
 #                       C has [ ( 1+5xN ) x T ] dimension with N number of variables in the system
-#           CI1, CI2    2.5% and 97.5% quantiles of all C measures
-#                       CI1 and CI2 has [ ( 1+5xN ) x T ] dimension with N number of variables in the system
+#           CI          standard deviation of all C measures
+#                       CI has [ ( 1+5xN ) x T ] dimension with N number of variables in the system
 # OUTPUT ROWs:
 #          1 is Total network connectedness
 #          2+0xN...1xN+1 is net TO network connectedness for all N variables
@@ -78,10 +78,10 @@ C, CI1, CI2 = DynNet_time(data,L,H,W,Nsim,corr)
 
 
 ```julia
-@time C,CI1,CI2 = DynNet_time(data,2,10,8,100,false);
+@time C,CI = DynNet_time(data,2,10,8,100,false);
 ```
 
-     52.891592 seconds (128.32 M allocations: 72.613 GiB, 7.22% gc time)
+     46.210951 seconds (128.11 M allocations: 72.418 GiB, 5.63% gc time)
 
 
 Dimension of the estimated measures is always [ ( 1+5xN ) x T ], for N=4 variables and T=1832 time periods, it is
@@ -102,7 +102,7 @@ The first row of C and CI is holding total dynamic network connectedness meadian
 
 
 ```julia
-plot(C[1,:],ribbon=(C[1,:]-CI1[1,:],CI2[1,:]-C[1,:]),fillalpha=0.2,color=["black" "grey" "grey"],legend=false,ylim=[0,100],framestyle = :box,
+plot(C[1,:],ribbon=(1.96*CI[1,:],1.96*CI[1,:]),fillalpha=0.2,color=["black" "grey" "grey"],legend=false,ylim=[0,100],framestyle = :box,
     size=(800,480),title="TVP Network Connectedness")
 ```
 
@@ -116,10 +116,9 @@ plot(C[1,:],ribbon=(C[1,:]-CI1[1,:],CI2[1,:]-C[1,:]),fillalpha=0.2,color=["black
 
 ```julia
 i=3
-
-plot(plot(C[i+1,:],ribbon=(C[i+1,:]-CI1[i+1,:],CI2[i+1,:]-C[i+1,:]),fillalpha=0.2,color=["black" "grey" "grey"],legend=false,ylim=[0,40],framestyle = :box,
+plot(plot(C[i+1,:],ribbon=(1.96*CI[i+1,:],1.96*CI[i+1,:]),fillalpha=0.2,color=["black" "grey" "grey"],legend=false,ylim=[0,10],framestyle = :box,
     size=(400,400),title="Directional TO for Variable 3"),
-    plot(C[2+1*4+i-1,:],ribbon=(C[2+1*4+i-1,:]-CI1[2+1*4+i-1,:],CI2[2+1*4+i-1,:]-C[2+1*4+i-1,:]),fillalpha=0.2,color=["black" "grey" "grey"],legend=false,ylim=[0,40],framestyle = :box,
+    plot(C[2+9+i-1,:],ribbon=(1.96*CI[2+9+i-1,:],1.96*CI[2+9+i-1,:]),fillalpha=0.2,color=["black" "grey" "grey"],legend=false,ylim=[0,10],framestyle = :box,
     size=(400,400),title="Directional FROM for Variable 3"),
 size=(1000,400))
 ```
@@ -133,7 +132,7 @@ size=(1000,400))
 
 
 ```julia
-plot(C[2+4*4+i-1,:],ribbon=(C[2+4*4+i-1,:]-CI1[2+4*4+i-1,:],CI2[2+4*4+i-1,:]-C[2+4*4+i-1,:]),fillalpha=0.2,color=["black" "grey" "grey"],legend=false,ylim=[-8,40],framestyle = :box,
+plot(C[2+4*4+i-1,:],ribbon=(1.96*CI[2+4*4+i-1,:],1.96*CI[2+4*4+i-1,:]),fillalpha=0.2,color=["black" "grey" "grey"],legend=false,ylim=[-4,4],framestyle = :box,
     size=(500,400),title="Directional NET for variable 3")
 ```
 
@@ -151,7 +150,7 @@ Note that current version of the codes works with 3 possible horizons of user's 
 Function DynNet estimates time varying total network connectedness as well as directional connectedness with following inputs and outputs, timing for a 9 variable system and 33 simulations is for MacBook Pro 2016 with 2.9 GHz Dual-Core Intel Core i5
 
 ````julia
-C,CI1,CI2 = DynNet(data,horizon1,horizon2,L,W,Nsim,corr)
+C,CI = DynNet(data,horizon1,horizon2,L,W,Nsim,corr)
 
 # INPUTS:  horizon1 = 5  horizon cutting short and medium run
 #          horizon2 = 20 horizon cutting medium and long run
@@ -163,7 +162,7 @@ C,CI1,CI2 = DynNet(data,horizon1,horizon2,L,W,Nsim,corr)
 #
 # OUTPUTS:  C           median estimates of Network Connectedness
 #                       C has [ (7 + (2*4*2+4)*N ) x T ] dimension with N number of variables in the system
-#           CI1, CI2    2.5% and 97.5% quantiles of all C measures
+#           CI          standard deviation of all C measures
 #                       CI has [ ( 7 + (2*4*2+4)*N ) x T ] dimension with N number of variables in the system
 # OUTPUT ROWs:
 #          1               is total connectedness (as sum of long+medium+short)
@@ -202,10 +201,10 @@ Example of dynamic horizon specific network with horizons defined as
 
 
 ```julia
-@time Chorizon,CIhorizon1,CIhorizon2 = DynNet(data,5,20,2,8,33,false);
+@time Chorizon,CIhorizon = DynNet(data,5,20,2,8,33,false);
 ```
 
-    282.081246 seconds (1.54 G allocations: 175.778 GiB, 5.19% gc time)
+    260.019783 seconds (1.52 G allocations: 174.821 GiB, 4.01% gc time)
 
 
 Dimension of the estimated measures is always [ (7 + (2x4x2+4)xN ) x T ], for N=9 variables and T=1832 time periods, it is
@@ -227,11 +226,11 @@ The rows 2,3,4 hold long-term, smedium-term and short-term network connectedness
 
 
 ```julia
-plot(Chorizon[1,:],ribbon=(Chorizon[1,:]-CIhorizon1[1,:],CIhorizon2[1,:]-Chorizon[1,:]),fillalpha=0.2,color=["black" "grey" "grey"],legend=false,ylim=[0,100],framestyle = :box,
+plot(Chorizon[1,:],ribbon=(1.96*CIhorizon[1,:],1.96*CIhorizon[1,:]),fillalpha=0.2,color=["black" "grey" "grey"],legend=false,ylim=[0,100],framestyle = :box,
     size=(800,480),title="TVP Network Connectedness")
-plot!(Chorizon[2,:],ribbon=(Chorizon[2,:]-CIhorizon1[2,:],CIhorizon2[2,:]-Chorizon[2,:]),fillalpha=0.2,color=["red" "red" "red"])
-plot!(Chorizon[3,:],ribbon=(Chorizon[3,:]-CIhorizon1[3,:],CIhorizon2[3,:]-Chorizon[3,:]),fillalpha=0.2,color=["blue" "blue" "blue"])
-plot!(Chorizon[4,:],ribbon=(Chorizon[4,:]-CIhorizon1[4,:],CIhorizon2[4,:]-Chorizon[4,:]),fillalpha=0.2,color=["green" "green" "green"])
+plot!(Chorizon[2,:],ribbon=(1.96*CIhorizon[2,:],1.96*CIhorizon[2,:]),fillalpha=0.2,color=["red" "red" "red"])
+plot!(Chorizon[3,:],ribbon=(1.96*CIhorizon[3,:],1.96*CIhorizon[3,:]),fillalpha=0.2,color=["blue" "blue" "blue"])
+plot!(Chorizon[4,:],ribbon=(1.96*CIhorizon[4,:],1.96*CIhorizon[4,:]),fillalpha=0.2,color=["green" "green" "green"])
 ```
 
 
@@ -254,7 +253,7 @@ Pkg.add("Distributed")
 Note that in the paper we estimate system of 496 stocks that required several days of multiple server time, hence it is useful to adapt function to the needs of a specific case. For example you can consider saving the results to files as in following example which distributes the core of  the function
 
 ````julia
-C,CI1,CI2 = DynNet(data,horizon1,horizon2,L,H,W,Nsim,corr)
+C,CI = DynNet(data,horizon1,horizon2,L,H,W,Nsim,corr)
 ````
 
 to multiple cores. The computation can be distributed to multiple cores simply, here is an example running on 48 core server
@@ -305,12 +304,12 @@ end
 for it in 1:T
 
 	out = hcat(pmap(i -> f_all(it, i,5,20, T, N, L, weights1, priorprec0, X, y, SI, PI, a, RI), 1:Nsim)...);
-    
-    xmed = [quantile(out[i,:],0.5) for i=1:size(out)[1]]
-	xci1 = [quantile(out[i,:],0.025) for i=1:size(out)[1]]
-    xci2 = [quantile(out[i,:],0.975) for i=1:size(out)[1]]
 
-	CSV.write("results_time_$it.csv", DataFrame([xmed xci1 xci2]))
+	xmed = median(out,dims=2)
+	xmean = mean(out,dims=2)
+	xsd = std(out,dims=2)
+
+	CSV.write("results_time_$it.csv", DataFrame([xmed xmean xsd]))
 
 end
 ```
