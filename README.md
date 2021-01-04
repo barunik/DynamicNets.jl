@@ -81,7 +81,7 @@ C, CI1, CI2 = DynNet_time(data,L,H,W,Nsim,corr)
 @time C,CI1,CI2 = DynNet_time(data,2,10,8,100,false);
 ```
 
-     52.891592 seconds (128.32 M allocations: 72.613 GiB, 7.22% gc time)
+     49.943381 seconds (152.86 M allocations: 74.046 GiB, 8.95% gc time)
 
 
 Dimension of the estimated measures is always [ ( 1+5xN ) x T ], for N=4 variables and T=1832 time periods, it is
@@ -133,7 +133,7 @@ size=(1000,400))
 
 
 ```julia
-plot(C[2+4*4+i-1,:],ribbon=(C[2+4*4+i-1,:]-CI1[2+4*4+i-1,:],CI2[2+4*4+i-1,:]-C[2+4*4+i-1,:]),fillalpha=0.2,color=["black" "grey" "grey"],legend=false,ylim=[-8,40],framestyle = :box,
+plot(C[2+4*4+i-1,:],ribbon=(C[2+4*4+i-1,:]-CI1[2+4*4+i-1,:],CI2[2+4*4+i-1,:]-C[2+4*4+i-1,:]),fillalpha=0.2,color=["black" "grey" "grey"],legend=false,framestyle = :box,
     size=(500,400),title="Directional NET for variable 3")
 ```
 
@@ -148,7 +148,7 @@ plot(C[2+4*4+i-1,:],ribbon=(C[2+4*4+i-1,:]-CI1[2+4*4+i-1,:],CI2[2+4*4+i-1,:]-C[2
 
 Note that current version of the codes works with 3 possible horizons of user's choice
 
-Function DynNet estimates time varying total network connectedness as well as directional connectedness with following inputs and outputs, timing for a 9 variable system and 33 simulations is for MacBook Pro 2016 with 2.9 GHz Dual-Core Intel Core i5
+Function DynNet estimates time varying total network connectedness as well as directional connectedness with following inputs and outputs, timing for a 4 variable system and 33 simulations is for MacBook Pro 2020 with 2,3 GHz Quad-Core Intel Core i7 with 32GB 3733 MHz Memory.
 
 ````julia
 C,CI1,CI2 = DynNet(data,horizon1,horizon2,L,W,Nsim,corr)
@@ -205,10 +205,10 @@ Example of dynamic horizon specific network with horizons defined as
 @time Chorizon,CIhorizon1,CIhorizon2 = DynNet(data,5,20,2,8,33,false);
 ```
 
-    282.081246 seconds (1.54 G allocations: 175.778 GiB, 5.19% gc time)
+    254.203594 seconds (1.53 G allocations: 175.150 GiB, 4.08% gc time)
 
 
-Dimension of the estimated measures is always [ (7 + (2x4x2+4)xN ) x T ], for N=9 variables and T=1832 time periods, it is
+Dimension of the estimated measures is always [ (7 + (2x4x2+4)xN ) x T ], for N=4 variables and T=1832 time periods, it is
 
 
 ```julia

@@ -156,13 +156,14 @@ function get_GIRF(B, A0, ND::Int, N::Int, L::Int, HORZ::Int,corr)
 		bh = bh * B
 	end
 
-	A0 = (1.0 ./ sqrt.(diag(A0)))' .* A0
+	A0 = (1.0 ./ sqrt.(diag(A0))) .* A0
 
 	@views @inbounds for h in 1:(HORZ+1)
 		@inbounds for i in 1:N
 			ir1[:, i, h] = A0[i, :]' * wold[:, :, h]';
 		end
 	end
+
 
 	return ir1, wold
 end
@@ -205,14 +206,11 @@ function var_decomp(nvars, nsteps, ir)
 		end
 	end
 
-	@inbounds for k in 1:nsteps
-		@inbounds for i in 1:nvars
-			resp7[k, 1] = @views sum(resp6[i, :, k]);
-		end
-	end
-
 	@inbounds for j in 1:nvars
 		@inbounds for i in 1:nvars
+			@inbounds for k in 1:nsteps
+				resp7[k, 1] = @views sum(resp6[i, :, k]);
+			end
 			# conditional/unconditional variance
 			vardecomp[i, j, :] = @views (resp6[i, j, :])' ./ resp7'; 
 		end
