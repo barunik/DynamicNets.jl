@@ -110,7 +110,7 @@ size(C)
 
 
 
-The first row of C and CI is holding total dynamic network connectedness meadian and stadard deviation
+The first row of C and CI is holding total dynamic network connectedness median and 2.5% and 97.5% quantiles of network connectedness
 
 
 ```julia
