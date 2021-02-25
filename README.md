@@ -21,6 +21,14 @@ Pkg.add("Distributions")
 Pkg.add("Plots")
 ````
 
+OR, to install the same version of packages with which the projects is built and work in the environment of the project, you can do
+
+```julia
+using Pkg
+Pkg.activate(".") # activating project in its directory
+Pkg.instantiate() # installing packages with which versions the project is built
+```
+
 # Example of usage
 ## Time Dynamics of Network Connectedness
 
@@ -35,8 +43,12 @@ Load required packages
 
 
 ```julia
-using DataFrames, CSV, Statistics, LinearAlgebra, Distributions
-using Plots 
+using CSV
+using DataFrames
+using Distributions
+using LinearAlgebra
+using Statistics
+using Plots
 
 # load main functions
 include("DynamicNets_functions.jl");
@@ -78,7 +90,7 @@ C, CI1, CI2 = DynNet_time(data,L,H,W,Nsim,corr)
 
 
 ```julia
-@time C,CI1,CI2 = DynNet_time(data,2,10,8,100,false);
+@time C, CI1, CI2 = DynNet_time(data,2,10,8,100,false);
 ```
 
      49.943381 seconds (152.86 M allocations: 74.046 GiB, 8.95% gc time)
@@ -151,7 +163,7 @@ Note that current version of the codes works with 3 possible horizons of user's 
 Function DynNet estimates time varying total network connectedness as well as directional connectedness with following inputs and outputs, timing for a 4 variable system and 33 simulations is for MacBook Pro 2020 with 2,3 GHz Quad-Core Intel Core i7 with 32GB 3733 MHz Memory.
 
 ````julia
-C,CI1,CI2 = DynNet(data,horizon1,horizon2,L,W,Nsim,corr)
+C, CI1, CI2 = DynNet(data,horizon1,horizon2,L,W,Nsim,corr)
 
 # INPUTS:  horizon1 = 5  horizon cutting short and medium run
 #          horizon2 = 20 horizon cutting medium and long run
@@ -267,7 +279,11 @@ addprocs(48);
 
 
 ```julia
-@everywhere using DataFrames, CSV, Statistics, LinearAlgebra, Distributions
+@everywhere using CSV
+@everywhere using DataFrames
+@everywhere using Distributions
+@everywhere using LinearAlgebra
+@everywhere using Statistics
 
 # load main functions
 @everywhere include("DynamicNets_functions.jl");
@@ -304,7 +320,7 @@ end
 
 for it in 1:T
 
-	out = hcat(pmap(i -> f_all(it, i,5,20, T, N, L, weights1, priorprec0, X, y, SI, PI, a, RI), 1:Nsim)...);
+	out = hcat(pmap(i -> f_all(it, i,5,20, T, N, L, weights1, priorprec0, X, y, SI, PI, a, RI, false), 1:Nsim)...);
     
     xmed = [quantile(out[i,:],0.5) for i=1:size(out)[1]]
 	xci1 = [quantile(out[i,:],0.025) for i=1:size(out)[1]]
