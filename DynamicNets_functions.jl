@@ -548,3 +548,145 @@ function DynNet_time(data,L::Int,HH::Int,H::Int,Nsim::Int,corr)
 	return(xmean,xci1,xci2)
 
 end
+
+
+
+
+##### GET dynamic tables
+
+
+function DynNet_table(data,it,cut1::Int,cut2::Int,L::Int,H::Int,Nsim::Int,corr)
+
+	shrinkage = 0.05
+
+	T, N = size(data)
+	K = N * L + 1
+
+	X = zeros(Float64, T - L, K-1)
+	for i in 1:L
+		temp = lag0(data, i)
+	    X[:, (1 + N*(i-1) : i*N)] = temp[(1+L:T), :]
+	end
+	y = data[(1+L):T, :]
+	T = T - L
+	X = [ones(Float64, T, 1) X]
+
+	K = N * L + 1
+
+	SI, PI, a, RI = MinnNWprior(data, T, N, L, shrinkage)
+	weights1 = convert.(Float64, normker(T, H))
+	priorprec0 = convert.(Float64, inv(PI));
+
+	xmean=zeros(7 + (2*4*2+4)*N,T);
+	xci1=zeros(7 + (2*4*2+4)*N,T);
+    xci2=zeros(7 + (2*4*2+4)*N,T);
+
+    out = [f_all_table(it, i, cut1,cut2,T, N, L, weights1, priorprec0, X, y, SI, PI, a, RI,corr) for i in 1:Nsim]
+
+    table_all=[mean(filter(!isnan,[out[i][1][k,j] for i=1:Nsim])) for k=1:N, j=1:N]
+	table_long=[mean(filter(!isnan,[out[i][2][k,j] for i=1:Nsim])) for k=1:N, j=1:N]
+	table_medium=[mean(filter(!isnan,[out[i][3][k,j] for i=1:Nsim])) for k=1:N, j=1:N]
+	table_short=[mean(filter(!isnan,[out[i][4][k,j] for i=1:Nsim])) for k=1:N, j=1:N]
+       
+	return(table_all,table_long,table_medium,table_short)
+
+end
+
+
+function f_all_table(it, ij, cut1, cut2,T::Int,  N::Int, L::Int, weights1, priorprec0, X, y, SI, PI, a, RI,corr)
+
+	bayesalpha, bayessv, bayesgamma, BB = oneTimePrior(it, weights1, priorprec0, X, y, SI, PI, a, RI)
+
+	HO = 100 + 1 # IRF Horizon, Also use this for FEVD horizon.
+	ND = 1
+	HORZ = HO - 1
+
+	B0, A0 = getCoefsStable(bayesalpha, bayesgamma, bayessv, BB, N, L)
+
+	wold = get_GIRF_fast(B0, A0, ND, N, L, HORZ)
+	thetainf,temp1, temp2, temp3 = get_dynnet_table(wold, T, A0,corr,cut1,cut2);
+	return (thetainf,temp1, temp2, temp3)
+	
+end
+
+
+
+function get_dynnet_table(wo, TT, sig,corr,cut1::Int,cut2::Int)
+
+	Tw = 200 # Define frequency window;
+	omeg = LinRange(0.0, pi, Tw) # create equally spaced line from 0 to pi in 261 intervals
+
+	# Define bands
+	omeg2 = pi ./ omeg; 
+	d1 = omeg2 .> cut2       # long term equals (20,260+] days
+	d2 = (omeg2 .<= cut2) .* (omeg2 .> cut1)  # medium term equals (5,20] days
+	d3 = omeg2 .<= cut1    # short term equals [1,5] days
+
+	N = size(wo, 1)
+	HO = size(wo, 3)
+
+	if corr == true
+		diag_sig = Diagonal(sig);
+	end 
+	
+	if corr == false
+		diag_sig = sig;
+	end 
+	
+	expnnom = exp.(-im .* repeat(omeg, 1, HO) .* repeat((1:HO)', Tw, 1));
+	expnnom = convert.(Complex{Float32}, expnnom)
+
+	Omeg2 = Array{Float64}(undef, N, N)
+	@views @inbounds for hh in 1:HO
+		Omeg2 += wo[:,:,hh] * (diag_sig * wo[:,:,hh]')
+	end
+	Omeg2 = diag(Omeg2)
+
+	wo = convert.(Float32, wo);
+	FC = Array{Float64}(undef, N, N, Tw);
+
+	GI = Array{Complex{Float32}}(undef, N, N);
+
+	@views @inbounds for w in 1:Tw
+		
+		fill!(GI, 0.0);
+		for nn in 1:HO
+			GI .+= wo[:, :, nn] .* expnnom[w, nn];
+		end
+
+		PS = abs2.(GI * diag_sig); 
+
+		@inbounds for k in 1:N 
+			@inbounds for j in 1:N 
+				FC[j, k, w] = PS[j, k] ./ (Omeg2[j] .* sig[k, k]);
+			end
+		end
+	end
+
+	PP1 = dropdims(sum(FC, dims = 3), dims=3);
+	
+	@views for w in 1:Tw
+		for j in 1:N
+			FC[j, :, w] = FC[j, :, w] ./ sum(PP1[j, :]); 
+		end
+	end
+
+	thetainf = dropdims(sum(FC, dims = 3), dims=3);
+
+	### BANDS : d1 d2 d3, Long, Medium, Short
+	# theta_{d_i} summed over bands
+	temp1 = dropdims(sum(FC[:, :, d1], dims = 3), dims=3); 
+	temp2 = dropdims(sum(FC[:, :, d2], dims = 3), dims=3);
+	temp3 = dropdims(sum(FC[:, :, d3], dims = 3), dims=3);
+
+	for j in 1:N
+		sumthetaj = sum(thetainf[j, :]);
+		temp1[j, :] = temp1[j, :] ./ sumthetaj;
+		temp2[j, :] = temp2[j, :] ./ sumthetaj;
+		temp3[j, :] = temp3[j, :] ./ sumthetaj;
+	end
+
+	return(thetainf,temp1, temp2, temp3)
+end
+
+
