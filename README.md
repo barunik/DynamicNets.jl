@@ -290,6 +290,8 @@ table_total, table_long, table_medium, table_short = DynNet_table(data,t,horizon
 #           table_short  N x N short-run adjacency matrix for a given period of time t
 ````
 
+Chose time period (alternatively use this function in loop to compute tables for more time periods)
+
 
 ```julia
 t=100
@@ -366,6 +368,10 @@ table_short
 
 
 
+Alternatively, one can view the adjacency matrix graphically, this is especially useful in large dimensions. In a similar way, one can use adjacency matrix for graph representations.
+
+It is useful to get rid of diagonals for a network representations
+
 
 ```julia
 table_total[diagind(table_total)].=0
@@ -375,7 +381,7 @@ heatmap(table_total,color=:coolwarm,aspect_ratio=1.0,size=(300,300),title="total
 
 
 
-![svg](/readme_files/output_39_0.svg)
+![svg](/readme_files/output_41_0.svg)
 
 
 
@@ -393,7 +399,7 @@ plot(k2,k3,k4,layout=(1,3),size=(900,300))
 
 
 
-![svg](/readme_files/output_40_0.svg)
+![svg](/readme_files/output_42_0.svg)
 
 
 
@@ -476,7 +482,7 @@ for it in 1:T
 end
 ```
 
+## Wish List
 
-```julia
-
-```
+* implement test for heterogeneity of horizons
+* implement generic choice of horizons
