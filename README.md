@@ -37,9 +37,6 @@ Pkg.activate(".") # activating project in its directory
 Pkg.instantiate() # installing packages with which versions the project is built
 ```
 
-    [32m[1m Activating[22m[39m environment at `~/Documents/GitHub/DynamicNets/Project.toml`
-
-
 ### All consecutive uses of the notebook
 
 
@@ -47,9 +44,6 @@ Pkg.instantiate() # installing packages with which versions the project is built
 using Pkg
 Pkg.activate(".") # activating project in its directory
 ```
-
-    [32m[1m Activating[22m[39m environment at `~/Documents/GitHub/DynamicNets/Project.toml`
-
 
 Load Packages
 
